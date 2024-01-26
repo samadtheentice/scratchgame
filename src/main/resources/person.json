@@ -1,0 +1,21 @@
+{
+  "firstName": "Jason",
+  "lastName": "Jackson",
+  "age": 40,
+  "address": {
+    "number": "55",
+    "street": "Sesame",
+    "zipCode": "99901"
+  },
+  "phone": [
+    {
+      "cell": "555-111-001"
+    },
+    {
+      "work": "555-222-002"
+    },
+    {
+      "home": "555-333-003"
+    }
+  ]
+}
