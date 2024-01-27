@@ -1,52 +1,91 @@
 package org.cyberspeed.application;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.cyberspeed.domain.GameConfigData;
+import org.cyberspeed.constants.ScratchGameConstants;
+import org.cyberspeed.exception.ConfigFileParsingException;
+import org.cyberspeed.ScratchGameConfigParser;
+import org.cyberspeed.model.GameConfigData;
+import org.cyberspeed.model.Probability;
+import org.cyberspeed.model.ProbabilityData;
+import org.cyberspeed.model.ProbabilitySymbol;
 
-import java.io.IOException;
-import java.io.InputStream;
-
-import org.cyberspeed.objectmapper.ObjectMapperBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.time.Duration;
+import java.util.Random;
+import java.util.concurrent.CompletableFuture;
 
 public class ScratchGame {
-    static final Logger logger = LoggerFactory.getLogger(ScratchGame.class);
 
     public static void main(String[] args) {
 
-        /*logger.info("welcome to scratch game arg 0.."+args[0]);
-        logger.info("welcome to scratch game arg 1.."+args[1]);
-        logger.info("welcome to scratch game arg 2.."+args[2]);*/
-
-
-
-        try(InputStream in=Thread.currentThread().getContextClassLoader().getResourceAsStream("configupdated.json")){
-            jsonToObject(in);
-        }
-        catch(Exception e){
+        try {
+            GameConfigData gameConfigData = ScratchGameConfigParser.getScratchGameConfigData("C:\\scratchgame\\src\\main\\resources\\configupdated.json");
+            loadGameBoardWithStandardSymbol(gameConfigData);
+        } catch (ConfigFileParsingException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static void loadGameBoardWithStandardSymbol(final GameConfigData gameConfigData){
+
+        final short rows = gameConfigData.getRows();
+        final short columns =  gameConfigData.getColumns();
+
+        /*System.out.println(gameConfigData.getProbabilities().stream()
+                .filter(probalities -> ScratchGameConstants.STANDARD_SYMBOL.equalsIgnoreCase(probalities.getType())).findFirst().get().getType());
+
+        gameConfigData.getProbabilities().stream()
+                .filter(probalities -> ScratchGameConstants.STANDARD_SYMBOL.equalsIgnoreCase(probalities.getType())).findFirst().get().getProbablityData().stream().forEach(pd->{
+                    System.out.println("pd..."+pd.getSymbols());
+                });
+
+        gameConfigData.getProbabilities().stream()
+                .filter(probalities -> ScratchGameConstants.STANDARD_SYMBOL.equalsIgnoreCase(probalities.getType()))
+                .findFirst()
+                .map(probalitiy -> {
+                    System.out.println("probalitiy..."+probalitiy);
+                    return probalitiy;
+                });*/
+
+        //standard probabilities
+        gameConfigData.getProbabilities().stream()
+                .filter(probalities -> ScratchGameConstants.STANDARD_SYMBOL.equalsIgnoreCase(probalities.getType()))
+                .findFirst()
+                .map(probalitiy -> {
+                    System.out.println("non parallel start********");
+                    long start = System.currentTimeMillis();
+                    probalitiy.getProbablityData().stream().forEach(probalitiyData -> {
+                        System.out.println("selected symbol....("+probalitiyData.getRow() + ","+probalitiyData.getColumn()+") selected symbol.." +getneareRandomSymbol(probalitiyData));
+                    });
+                    long end = System.currentTimeMillis();
+                    System.out.println("Non Parallel Elapsed Time:::::::::::::::::::: "+ (end-start));
+
+                    System.out.println("parallel start********");
+                    long start1 = System.currentTimeMillis();
+                    probalitiy.getProbablityData().parallelStream().forEach(probalitiyData -> {
+                        System.out.println("selected symbol....("+probalitiyData.getRow() + ","+probalitiyData.getColumn()+") selected symbol.." +getneareRandomSymbol(probalitiyData));
+                    });
+                    long end1 = System.currentTimeMillis();
+                    System.out.println("Parallel Elapsed Time::::::::::::::::::::: "+ (end1-start1));
+
+                    return null;
+                });
+
 
     }
 
-    public static GameConfigData jsonToObject(InputStream in) {
-        GameConfigData gameConfig = new GameConfigData();
-
-
-        System.out.println("test..."+in.toString());
-
-        ObjectMapper mapper = ObjectMapperBuilder.build();
-
-        try {
-            gameConfig = mapper.readValue(in, GameConfigData.class);
-            System.out.println("wc..."+gameConfig.getWinCombinations().stream().filter(wc->"vertically_linear_symbols".equalsIgnoreCase(wc.getGroup())).findFirst().get().getCoveredAreas());
-
-            //System.out.println("object mapper..."+gameConfig);
-        } catch (IOException e) {
-            e.printStackTrace();
+    //Generate random symbol based on the probability percentage
+    public static String getneareRandomSymbol(final ProbabilityData probalitiyData){
+        int totalValue = probalitiyData.getSymbols().stream().mapToInt(symbol -> symbol.getValue()).sum();
+        final int randomNumber = new Random().nextInt(100);
+        float cumulativeProbability=0.0f;
+        String selectedSymbol=null;
+        for (ProbabilitySymbol probSymbol : probalitiyData.getSymbols()) {
+            cumulativeProbability += ((float)probSymbol.getValue()/totalValue)*100;
+            System.out.println("cumulativeProbability.."+cumulativeProbability);
+            if (randomNumber <= cumulativeProbability) {
+                selectedSymbol = probSymbol.getName();
+                break;
+            }
         }
-        return gameConfig;
+        return selectedSymbol;
     }
-
 }

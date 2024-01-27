@@ -1,4 +1,4 @@
-package org.cyberspeed.domain;
+package org.cyberspeed.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;

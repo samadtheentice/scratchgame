@@ -1,4 +1,4 @@
-package org.cyberspeed.domain;
+package org.cyberspeed.model;
 
 import lombok.Data;
 
