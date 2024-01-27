@@ -11,6 +11,7 @@ import org.cyberspeed.model.ProbabilitySymbol;
 import java.time.Duration;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.IntStream;
 
 public class ScratchGame {
 
@@ -25,60 +26,49 @@ public class ScratchGame {
     }
 
     public static void loadGameBoardWithStandardSymbol(final GameConfigData gameConfigData){
+        generateMatrixWithStandardAndBonusSymbolMerged(gameConfigData);
+    }
 
-        final short rows = gameConfigData.getRows();
-        final short columns =  gameConfigData.getColumns();
-
-        /*System.out.println(gameConfigData.getProbabilities().stream()
-                .filter(probalities -> ScratchGameConstants.STANDARD_SYMBOL.equalsIgnoreCase(probalities.getType())).findFirst().get().getType());
-
+    public static void populateBoardWithRandomSymbol(final GameConfigData gameConfigData, final String symbolType, final String[][] board){
         gameConfigData.getProbabilities().stream()
-                .filter(probalities -> ScratchGameConstants.STANDARD_SYMBOL.equalsIgnoreCase(probalities.getType())).findFirst().get().getProbablityData().stream().forEach(pd->{
-                    System.out.println("pd..."+pd.getSymbols());
-                });
-
-        gameConfigData.getProbabilities().stream()
-                .filter(probalities -> ScratchGameConstants.STANDARD_SYMBOL.equalsIgnoreCase(probalities.getType()))
+                .filter(probalities -> symbolType.equalsIgnoreCase(probalities.getType()))
                 .findFirst()
                 .map(probalitiy -> {
-                    System.out.println("probalitiy..."+probalitiy);
-                    return probalitiy;
-                });*/
-
-        //standard probabilities
-        gameConfigData.getProbabilities().stream()
-                .filter(probalities -> ScratchGameConstants.STANDARD_SYMBOL.equalsIgnoreCase(probalities.getType()))
-                .findFirst()
-                .map(probalitiy -> {
-                    System.out.println("non parallel start********");
-                    long start = System.currentTimeMillis();
-                    probalitiy.getProbablityData().stream().forEach(probalitiyData -> {
-                        System.out.println("selected symbol....("+probalitiyData.getRow() + ","+probalitiyData.getColumn()+") selected symbol.." +getneareRandomSymbol(probalitiyData));
-                    });
-                    long end = System.currentTimeMillis();
-                    System.out.println("Non Parallel Elapsed Time:::::::::::::::::::: "+ (end-start));
-
-                    System.out.println("parallel start********");
-                    long start1 = System.currentTimeMillis();
                     probalitiy.getProbablityData().parallelStream().forEach(probalitiyData -> {
-                        System.out.println("selected symbol....("+probalitiyData.getRow() + ","+probalitiyData.getColumn()+") selected symbol.." +getneareRandomSymbol(probalitiyData));
+                        board[probalitiyData.getRow()][probalitiyData.getColumn()]=getRandomSymbol(probalitiyData);
                     });
-                    long end1 = System.currentTimeMillis();
-                    System.out.println("Parallel Elapsed Time::::::::::::::::::::: "+ (end1-start1));
-
                     return null;
                 });
+    }
 
+    public static String[][] generateMatrixWithStandardAndBonusSymbolMerged(final GameConfigData gameConfigData){
 
+        final String[][] standardSymbols = new String[gameConfigData.getRows()][gameConfigData.getColumns()];
+        final String[][] bonusSymbols = new String[1][1];
+
+        //standard probabilities
+        populateBoardWithRandomSymbol(gameConfigData, ScratchGameConstants.STANDARD_SYMBOL, standardSymbols);
+        //bonus probabilities
+        populateBoardWithRandomSymbol(gameConfigData, ScratchGameConstants.BONUS_SYMBOL, bonusSymbols);
+
+        //replace a standard symbol with a bonus symbol
+        standardSymbols[new Random().nextInt((gameConfigData.getRows()))][new Random().nextInt((gameConfigData.getColumns()))]=bonusSymbols[0][0];
+
+        /*IntStream.range(0, gameConfigData.getRows()).forEach(i -> {
+            IntStream.range(0, gameConfigData.getColumns()).forEach( j -> {
+                System.out.println("standard symbol....("+i + ","+j+") selected symbol.." +standardSymbols[i][j]);
+            });
+        });*/
+        return standardSymbols;
     }
 
     //Generate random symbol based on the probability percentage
-    public static String getneareRandomSymbol(final ProbabilityData probalitiyData){
-        int totalValue = probalitiyData.getSymbols().stream().mapToInt(symbol -> symbol.getValue()).sum();
+    public static String getRandomSymbol(final ProbabilityData probalitiyData){
+        final int totalValue = probalitiyData.getSymbols().stream().mapToInt(ProbabilitySymbol::getValue).sum();
         final int randomNumber = new Random().nextInt(100);
         float cumulativeProbability=0.0f;
         String selectedSymbol=null;
-        for (ProbabilitySymbol probSymbol : probalitiyData.getSymbols()) {
+        for (final ProbabilitySymbol probSymbol : probalitiyData.getSymbols()) {
             cumulativeProbability += ((float)probSymbol.getValue()/totalValue)*100;
             System.out.println("cumulativeProbability.."+cumulativeProbability);
             if (randomNumber <= cumulativeProbability) {
