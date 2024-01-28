@@ -1,6 +1,6 @@
 plugins {
-    id 'java'
-    //id 'application'
+    //id 'java'
+    id 'application'
 }
 
 group = 'org.cyberspeed'
@@ -46,6 +46,6 @@ task customFatJar(type: Jar) {
 }
 
 
-/*application {
+application {
     mainClassName = 'org.cyberspeed.application.ScratchGame'
-}*/
+}

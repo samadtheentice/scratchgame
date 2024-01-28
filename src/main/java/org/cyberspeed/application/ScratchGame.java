@@ -8,8 +8,12 @@ import org.cyberspeed.model.*;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import org.cyberspeed.service.ScratchGameBoard;
+import org.cyberspeed.service.GameBoard;
 
 public class ScratchGame {
 
@@ -17,7 +21,11 @@ public class ScratchGame {
 
         try {
             GameConfigData gameConfigData = ScratchGameConfigParser.getScratchGameConfigData("C:\\scratchgame\\src\\main\\resources\\configupdated.json");
-            playGame(gameConfigData);
+            //playGame(gameConfigData);
+
+            GameBoard gb = new ScratchGameBoard(gameConfigData);
+            gb.playGame();
+
         } catch (ConfigFileParsingException e) {
             throw new RuntimeException(e);
         }
@@ -53,8 +61,8 @@ public class ScratchGame {
 
     }
 
-
     public static  Map<String,Integer> countSameSymbols(final String[][] matrix, final String horizontalCells, final String diagonalLeftToRightCells,final String diagonalRightToLeftCells, final String verticalCells){
+        final Map<String,List<String>> appliedWinningCombination = new HashMap<>();
         //iterate the matrix to find the count of repeated symbol
         Map<String,Integer> sameSymbolCounter = new HashMap<>();
         List<String> horizontalSymbolMatchList = new ArrayList<>();
@@ -88,6 +96,7 @@ public class ScratchGame {
 
                 System.out.println("reverse...("+j+","+i+")"+matrix[j][i]);
                 ///horizontal match start
+                //horizontalSymbolsMatch = compute(matrix, horizontalCells,horizontalSymbol,i,j);
                 if(horizontalCells.contains(i + ":" + j) ){
 
                     if(null == horizontalSymbol){
@@ -100,6 +109,7 @@ public class ScratchGame {
                 ///horizontal match end
 
                 ///vertical match start
+                //verticalSymbolsMatch = compute(matrix, verticalCells,verticalSymbol,j,i);
                 if(verticalCells.contains(j + ":" + i) ){
 
                     if(null == verticalSymbol){
@@ -112,6 +122,7 @@ public class ScratchGame {
                 ///vertical match end
 
                 ///diagonal left to right match start
+                //diagonalLeftToRightSymbolsMatch = compute(matrix, diagonalLeftToRightCells,diagonalLeftToRightSymbol,i,j);
                 if(diagonalLeftToRightCells.contains(i + ":" + j) ){
                     if(null == diagonalLeftToRightSymbol){
                         diagonalLeftToRightSymbol=matrix[i][j];
@@ -124,6 +135,7 @@ public class ScratchGame {
 
 
                 ///diagonal right to left match start
+                //diagonalRightToLeftSymbolsMatch = compute(matrix, diagonalRightToLeftCells,diagonalRightToLeftSymbol,i,j);
                 if(diagonalRightToLeftCells.contains(i + ":" + j) ){
                     if(null == diagonalRightToLeftSymbol){
                         diagonalRightToLeftSymbol=matrix[i][j];
@@ -176,29 +188,29 @@ public class ScratchGame {
             System.out.println("diagonal right to left match..." + symb);
         });
 
+        sameSymbolCounter.forEach((k,v)->{
+            appliedWinningCombination.put(k,new ArrayList<String>(Arrays.asList("same_symbol_"+v+"_times")));
+        });
+        horizontalSymbolMatchList.forEach(k->{
+            appliedWinningCombination.computeIfAbsent(k, v -> new ArrayList<>()).add(ScratchGameConstants.SAME_SYMBL_HORIZONTAL);
+        });
 
+        verticalSymbolMatchList.forEach(k->{
+            appliedWinningCombination.computeIfAbsent(k, v -> new ArrayList<>()).add(ScratchGameConstants.SAME_SYMBL_VERTICAL);
+        });
+
+        diagonalLeftToRightSymbolMatchList.forEach(k->{
+            appliedWinningCombination.computeIfAbsent(k, v -> new ArrayList<>()).add(ScratchGameConstants.SAME_SYMBL_LTR_DIAGONAL);
+        });
+
+        diagonalRightToLeftSymbolMatchList.forEach(k->{
+            appliedWinningCombination.computeIfAbsent(k, v -> new ArrayList<>()).add(ScratchGameConstants.SAME_SYMBL_RTL_DIAGONAL);
+        });
+
+        appliedWinningCombination.keySet().forEach(k->{
+            System.out.println(k+"..."+appliedWinningCombination.get(k));
+        });
         return sameSymbolCounter;
-    }
-
-
-    public static void sameSymbolWinner(){
-
-    }
-
-    public static void sameSymbolHorizontalWinner(){
-
-    }
-
-    public static void sameSymbolVerticalWinner(){
-
-    }
-
-    public static void sameSymbolDiagonalLeftToRightWinner(){
-
-    }
-
-    public static void sameSymbolDiagonalRightToLeftWinner(){
-
     }
 
 
