@@ -3,14 +3,12 @@ package org.cyberspeed.application;
 import org.cyberspeed.constants.ScratchGameConstants;
 import org.cyberspeed.exception.ConfigFileParsingException;
 import org.cyberspeed.ScratchGameConfigParser;
-import org.cyberspeed.model.GameConfigData;
-import org.cyberspeed.model.Probability;
-import org.cyberspeed.model.ProbabilityData;
-import org.cyberspeed.model.ProbabilitySymbol;
+import org.cyberspeed.model.*;
 
 import java.time.Duration;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class ScratchGame {
@@ -19,60 +17,228 @@ public class ScratchGame {
 
         try {
             GameConfigData gameConfigData = ScratchGameConfigParser.getScratchGameConfigData("C:\\scratchgame\\src\\main\\resources\\configupdated.json");
-            loadGameBoardWithStandardSymbol(gameConfigData);
+            playGame(gameConfigData);
         } catch (ConfigFileParsingException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public static void loadGameBoardWithStandardSymbol(final GameConfigData gameConfigData){
-        generateMatrixWithStandardAndBonusSymbolMerged(gameConfigData);
+    public static void playGame(final GameConfigData gameConfigData){
+        final String[][] matrix = generateMatrixWithStandardAndBonusSymbol(gameConfigData);
+
+        decideWinningCombination(gameConfigData, matrix);
     }
 
-    public static void populateBoardWithRandomSymbol(final GameConfigData gameConfigData, final String symbolType, final String[][] board){
-        gameConfigData.getProbabilities().stream()
-                .filter(probalities -> symbolType.equalsIgnoreCase(probalities.getType()))
-                .findFirst()
-                .map(probalitiy -> {
-                    probalitiy.getProbablityData().parallelStream().forEach(probalitiyData -> {
-                        board[probalitiyData.getRow()][probalitiyData.getColumn()]=getRandomSymbol(probalitiyData);
-                    });
-                    return null;
-                });
+
+    public static void decideWinningCombination(final GameConfigData gameConfigData, final String[][] matrix){
+
+
+
+
+        //gameConfigData.getWinCombinations().stream().filter(sameSymbolwincom -> "same_symbols".equals(sameSymbolwincom.getGroup())).findFirst();
+        String horizontalCells = gameConfigData.getWinCombinations().stream().filter(sameSymbolwincom -> "horizontally_linear_symbols".equals(sameSymbolwincom.getGroup())).findFirst().get().getCoveredAreas().stream().flatMap(l->l.stream()).collect(Collectors.joining("::"));
+        String diagonalLeftToRightCells = gameConfigData.getWinCombinations().stream().filter(sameSymbolwincom -> "ltr_diagonally_linear_symbols".equals(sameSymbolwincom.getGroup())).findFirst().get().getCoveredAreas().stream().flatMap(l->l.stream()).collect(Collectors.joining("::"));
+        String diagonalRightToLeftCells = gameConfigData.getWinCombinations().stream().filter(sameSymbolwincom -> "rtl_diagonally_linear_symbols".equals(sameSymbolwincom.getGroup())).findFirst().get().getCoveredAreas().stream().flatMap(l->l.stream()).collect(Collectors.joining("::"));
+        String verticalCells = gameConfigData.getWinCombinations().stream().filter(sameSymbolwincom -> "vertically_linear_symbols".equals(sameSymbolwincom.getGroup())).findFirst().get().getCoveredAreas().stream().flatMap(l->l.stream()).collect(Collectors.joining("::"));
+
+
+        System.out.println("horizontalCells..."+horizontalCells);
+        System.out.println("diagonalLeftToRightCells..."+diagonalLeftToRightCells);
+        System.out.println("diagonalRightToLeftCells..."+diagonalRightToLeftCells);
+        verticalCells = new StringBuilder(verticalCells).reverse().toString();
+        System.out.println("verticalCells..."+verticalCells);
+        System.out.println("reversed verticalCells..."+verticalCells);
+
+        countSameSymbols(matrix, horizontalCells, diagonalLeftToRightCells, diagonalRightToLeftCells, verticalCells);
+
     }
 
-    public static String[][] generateMatrixWithStandardAndBonusSymbolMerged(final GameConfigData gameConfigData){
 
-        final String[][] standardSymbols = new String[gameConfigData.getRows()][gameConfigData.getColumns()];
-        final String[][] bonusSymbols = new String[1][1];
+    public static  Map<String,Integer> countSameSymbols(final String[][] matrix, final String horizontalCells, final String diagonalLeftToRightCells,final String diagonalRightToLeftCells, final String verticalCells){
+        //iterate the matrix to find the count of repeated symbol
+        Map<String,Integer> sameSymbolCounter = new HashMap<>();
+        List<String> horizontalSymbolMatchList = new ArrayList<>();
+        List<String> verticalSymbolMatchList = new ArrayList<>();
+        List<String> diagonalLeftToRightSymbolMatchList = new ArrayList<>();
+        List<String> diagonalRightToLeftSymbolMatchList = new ArrayList<>();
 
-        //standard probabilities
-        populateBoardWithRandomSymbol(gameConfigData, ScratchGameConstants.STANDARD_SYMBOL, standardSymbols);
-        //bonus probabilities
-        populateBoardWithRandomSymbol(gameConfigData, ScratchGameConstants.BONUS_SYMBOL, bonusSymbols);
+        ///diagonal left to right match start
+        boolean diagonalLeftToRightSymbolsMatch=false;
+        String diagonalLeftToRightSymbol=null;
+        ///diagonal left to right match end
 
-        //replace a standard symbol with a bonus symbol
-        standardSymbols[new Random().nextInt((gameConfigData.getRows()))][new Random().nextInt((gameConfigData.getColumns()))]=bonusSymbols[0][0];
+        ///diagonal right to left match start
+        boolean diagonalRightToLeftSymbolsMatch=false;
+        String diagonalRightToLeftSymbol=null;
+        ///diagonal right to left match end
 
-        /*IntStream.range(0, gameConfigData.getRows()).forEach(i -> {
+        for(int i=0;i < matrix.length;i++){
+            ///horizontal match start
+            boolean horizontalSymbolsMatch=false;
+            String horizontalSymbol=null;
+            ///horizontal match end
+
+            ///vertical match start
+            boolean verticalSymbolsMatch=false;
+            String verticalSymbol=null;
+            ///vertical match end
+
+            for(int j=0;j < matrix[i].length;j++){
+                sameSymbolCounter.put(matrix[i][j], sameSymbolCounter.getOrDefault(matrix[i][j], 0)+1);
+
+                System.out.println("reverse...("+j+","+i+")"+matrix[j][i]);
+                ///horizontal match start
+                if(horizontalCells.contains(i + ":" + j) ){
+
+                    if(null == horizontalSymbol){
+                        horizontalSymbol=matrix[i][j];
+                        horizontalSymbolsMatch=true;
+                    }else if(!matrix[i][j].equalsIgnoreCase(horizontalSymbol)){
+                        horizontalSymbolsMatch=false;
+                    }
+                }
+                ///horizontal match end
+
+                ///vertical match start
+                if(verticalCells.contains(j + ":" + i) ){
+
+                    if(null == verticalSymbol){
+                        verticalSymbol=matrix[j][i];
+                        verticalSymbolsMatch=true;
+                    }else if(!matrix[j][i].equalsIgnoreCase(verticalSymbol)){
+                        verticalSymbolsMatch=false;
+                    }
+                }
+                ///vertical match end
+
+                ///diagonal left to right match start
+                if(diagonalLeftToRightCells.contains(i + ":" + j) ){
+                    if(null == diagonalLeftToRightSymbol){
+                        diagonalLeftToRightSymbol=matrix[i][j];
+                        diagonalLeftToRightSymbolsMatch=true;
+                    }else if(!matrix[i][j].equalsIgnoreCase(diagonalLeftToRightSymbol)){
+                        diagonalLeftToRightSymbolsMatch=false;
+                    }
+                }
+                ///diagonal left to right match end
+
+
+                ///diagonal right to left match start
+                if(diagonalRightToLeftCells.contains(i + ":" + j) ){
+                    if(null == diagonalRightToLeftSymbol){
+                        diagonalRightToLeftSymbol=matrix[i][j];
+                        diagonalRightToLeftSymbolsMatch=true;
+                    }else if(!matrix[i][j].equalsIgnoreCase(diagonalRightToLeftSymbol)){
+                        diagonalRightToLeftSymbolsMatch=false;
+                    }
+                }
+                ///diagonal right to left match end
+            }
+
+            ///horizontal match start
+            if(horizontalSymbolsMatch){
+                horizontalSymbolMatchList.add(horizontalSymbol);
+            }
+            ///horizontal match end
+
+            ///vertical match start
+            if(verticalSymbolsMatch){
+                verticalSymbolMatchList.add(verticalSymbol);
+            }
+            ///vertical match end
+        }
+
+        ///diagonal left to right match start
+        if(diagonalLeftToRightSymbolsMatch){
+            diagonalLeftToRightSymbolMatchList.add(diagonalLeftToRightSymbol);
+        }
+        ///diagonal left to right match end
+
+        ///diagonal right to left match start
+        if(diagonalRightToLeftSymbolsMatch){
+            diagonalRightToLeftSymbolMatchList.add(diagonalRightToLeftSymbol);
+        }
+        ///diagonal right to left match end
+
+        horizontalSymbolMatchList.stream().forEach(symb->{
+                    System.out.println("horizontal match..."+symb);
+        });
+
+        verticalSymbolMatchList.stream().forEach(symb->{
+            System.out.println("vertical match..."+symb);
+        });
+
+        diagonalLeftToRightSymbolMatchList.stream().forEach(symb-> {
+            System.out.println("diagonal left to right match..." + symb);
+        });
+
+        diagonalRightToLeftSymbolMatchList.stream().forEach(symb-> {
+            System.out.println("diagonal right to left match..." + symb);
+        });
+
+
+        return sameSymbolCounter;
+    }
+
+
+    public static void sameSymbolWinner(){
+
+    }
+
+    public static void sameSymbolHorizontalWinner(){
+
+    }
+
+    public static void sameSymbolVerticalWinner(){
+
+    }
+
+    public static void sameSymbolDiagonalLeftToRightWinner(){
+
+    }
+
+    public static void sameSymbolDiagonalRightToLeftWinner(){
+
+    }
+
+
+    //generate matrix with standard and bonus symbol
+    public static String[][] generateMatrixWithStandardAndBonusSymbol(final GameConfigData gameConfigData){
+
+        final String[][] matrix = new String[gameConfigData.getRows()][gameConfigData.getColumns()];
+
+        //first populate the standard symbols in the matrix
+        gameConfigData.getProbabilities().getStandardSymbols().parallelStream().forEach(standardSymbol->{
+            matrix[standardSymbol.getRow()][standardSymbol.getColumn()]=getRandomSymbol(standardSymbol.getSymbols());
+        });
+
+        //populate the bonus symbol
+        final String bonusSymbol = getRandomSymbol(gameConfigData.getProbabilities().getBonusSymbols().getSymbols());
+
+        //replace bonus symbol to any random cell in the matrix
+        matrix[new Random().nextInt((gameConfigData.getRows()))][new Random().nextInt((gameConfigData.getColumns()))]=bonusSymbol;
+
+        //@TBR
+        IntStream.range(0, gameConfigData.getRows()).forEach(i -> {
             IntStream.range(0, gameConfigData.getColumns()).forEach( j -> {
-                System.out.println("standard symbol....("+i + ","+j+") selected symbol.." +standardSymbols[i][j]);
+                System.out.println("standard symbol....("+i + ","+j+") selected symbol.." +matrix[i][j]);
             });
-        });*/
-        return standardSymbols;
+        });
+        return matrix;
     }
+
 
     //Generate random symbol based on the probability percentage
-    public static String getRandomSymbol(final ProbabilityData probalitiyData){
-        final int totalValue = probalitiyData.getSymbols().stream().mapToInt(ProbabilitySymbol::getValue).sum();
+    public static String getRandomSymbol(final Map<String,Integer> symbols){
+        final int totalValue = symbols.values().stream().mapToInt(Integer::intValue).sum();
         final int randomNumber = new Random().nextInt(100);
         float cumulativeProbability=0.0f;
         String selectedSymbol=null;
-        for (final ProbabilitySymbol probSymbol : probalitiyData.getSymbols()) {
-            cumulativeProbability += ((float)probSymbol.getValue()/totalValue)*100;
-            System.out.println("cumulativeProbability.."+cumulativeProbability);
+
+        for (String key : symbols.keySet()) {
+            cumulativeProbability += ((float)symbols.get(key)/totalValue)*100;
             if (randomNumber <= cumulativeProbability) {
-                selectedSymbol = probSymbol.getName();
+                selectedSymbol = key;
                 break;
             }
         }

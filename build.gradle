@@ -1,6 +1,6 @@
 plugins {
-    //id 'java'
-    id 'application'
+    id 'java'
+    //id 'application'
 }
 
 group = 'org.cyberspeed'
@@ -24,7 +24,7 @@ test {
     useJUnitPlatform()
 }
 
-/*jar {
+jar {
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
     manifest {
         attributes "Main-Class": "org.cyberspeed.application.ScratchGame"
@@ -43,9 +43,9 @@ task customFatJar(type: Jar) {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
     with jar
-}*/
-
-
-application {
-    mainClassName = 'org.cyberspeed.application.ScratchGame'
 }
+
+
+/*application {
+    mainClassName = 'org.cyberspeed.application.ScratchGame'
+}*/

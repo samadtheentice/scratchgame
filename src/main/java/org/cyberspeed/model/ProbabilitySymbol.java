@@ -2,8 +2,9 @@ package org.cyberspeed.model;
 
 import lombok.Data;
 
+import java.util.Map;
+
 @Data
 public class ProbabilitySymbol {
-    private String name;
-    private short value;
+    Map<String,String> symbols;
 }

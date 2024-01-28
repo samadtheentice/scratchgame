@@ -3,9 +3,11 @@ package org.cyberspeed.model;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Map;
+
 @Data
-public class ProbabilityData {
+public class StandardSymbol {
     private short column;
     private short row;
-    private List<ProbabilitySymbol> symbols;
+    private Map<String,Integer> symbols;
 }
