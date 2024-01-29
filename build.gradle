@@ -16,8 +16,6 @@ dependencies {
     implementation group: 'org.projectlombok', name: 'lombok', version: '1.18.8'
     annotationProcessor 'org.projectlombok:lombok:1.18.8'
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.16.1'
-    /*implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
-    implementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.25'*/
 }
 
 test {
@@ -34,17 +32,6 @@ jar {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
 }
-
-task customFatJar(type: Jar) {
-    manifest {
-        attributes 'Main-Class': 'org.cyberspeed.application.ScratchGame'
-    }
-    archiveBaseName = 'all-in-one-jar'
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
-    with jar
-}
-
 
 application {
     mainClassName = 'org.cyberspeed.application.ScratchGame'
