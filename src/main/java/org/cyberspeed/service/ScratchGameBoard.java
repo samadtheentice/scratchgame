@@ -2,18 +2,13 @@ package org.cyberspeed.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.cyberspeed.constants.ScratchGameConstants;
-import org.cyberspeed.model.GameConfigData;
-import org.cyberspeed.model.ScratchGameResult;
-import org.cyberspeed.model.WinCombination;
+import org.cyberspeed.model.*;
 import org.cyberspeed.objectmapper.ObjectMapperBuilder;
 import org.cyberspeed.util.ScratchGameUtil;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import org.cyberspeed.model.Symbol;
 
 public class ScratchGameBoard implements GameBoard{
 
@@ -29,8 +24,12 @@ public class ScratchGameBoard implements GameBoard{
     public void loadStandardSymbolsInBoard(final String[][] matrix){
 
         //first populate the standard symbols in the matrix
-        gameConfigData.getProbabilities().getStandardSymbols().parallelStream().forEach(standardSymbol->{
-            matrix[standardSymbol.getRow()][standardSymbol.getColumn()]= ScratchGameUtil.generateRandomSymbol(standardSymbol.getSymbols());
+        Optional.ofNullable(gameConfigData.getProbabilities())
+                .map(Probability::getStandardSymbols)
+                .ifPresent(symbolLst-> {
+                    symbolLst.parallelStream().forEach(standardSymbol->{
+                    matrix[standardSymbol.getRow()][standardSymbol.getColumn()]= ScratchGameUtil.generateRandomSymbol(standardSymbol.getSymbols());
+                    });
         });
     }
 
@@ -57,7 +56,7 @@ public class ScratchGameBoard implements GameBoard{
         final Map<String,WinCombination> winCombMap = this.gameConfigData.getWinCombinations();
 
         final Function<WinCombination, String> winData = (winCombData) -> {
-            return winCombData.getCoveredAreas().stream()
+            return Optional.ofNullable(winCombData.getCoveredAreas()).orElse(new ArrayList<>(new ArrayList<>())).stream()
             .flatMap(Collection::stream).collect(Collectors.joining("::"));
         };
 
@@ -187,8 +186,11 @@ public class ScratchGameBoard implements GameBoard{
             final List<String> symbolWinComb = appliedWinningCombination.get(key);
             double reward = 0;
             //apply reward for symbol
-            double symbolReward = this.gameConfigData.getSymbols().get(key).getRewardMultiplier();
-            reward = betAmount * symbolReward;
+            final Symbol symbol = this.gameConfigData.getSymbols().get(key);
+            if(null != symbol) {
+                double symbolReward = symbol.getRewardMultiplier();
+                reward = betAmount * symbolReward;
+            }
             for(final String winComb : symbolWinComb){
                 //apply reward for winning combination
                 reward = reward * this.gameConfigData.getWinCombinations().get(winComb).getRewardMultiplier();
@@ -199,14 +201,12 @@ public class ScratchGameBoard implements GameBoard{
         //apply bonus if rewards more than 0
         if(totalReward > 0){
             final Symbol symbol = this.gameConfigData.getSymbols().get(bonusSymbol);
-            System.out.println("bonus chk1.."+bonusSymbol);
-            System.out.println("bonus chk2.."+symbol.getImpact());
-            if(ScratchGameConstants.MULTIPLY_REWARD.equalsIgnoreCase(symbol.getImpact())){
-                totalReward = totalReward * symbol.getRewardMultiplier();
-                System.out.println("bonus chk3.."+totalReward);
-            }else if(ScratchGameConstants.EXTRA_BONUS.equalsIgnoreCase(symbol.getImpact())){
-                totalReward = totalReward + symbol.getExtra();
-                System.out.println("bonus chk4.."+totalReward);
+            if(null != symbol) {
+                if (ScratchGameConstants.MULTIPLY_REWARD.equalsIgnoreCase(symbol.getImpact())) {
+                    totalReward = totalReward * symbol.getRewardMultiplier();
+                } else if (ScratchGameConstants.EXTRA_BONUS.equalsIgnoreCase(symbol.getImpact())) {
+                    totalReward = totalReward + symbol.getExtra();
+                }
             }
         }
         return totalReward;
