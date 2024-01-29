@@ -5,6 +5,9 @@ import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+/**
+ * Object mapper to parse json file
+ */
 public class ObjectMapperBuilder {
     private static volatile ObjectMapper objectMapper;
 

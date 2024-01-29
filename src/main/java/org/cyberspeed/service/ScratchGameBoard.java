@@ -6,23 +6,28 @@ import org.cyberspeed.model.*;
 import org.cyberspeed.objectmapper.ObjectMapperBuilder;
 import org.cyberspeed.util.ScratchGameUtil;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * Game board implementation
+ */
 public class ScratchGameBoard implements GameBoard{
 
-    private GameConfigData gameConfigData;
+    private final GameConfigData gameConfigData;
 
     public ScratchGameBoard(final GameConfigData gameConfigData){
         this.gameConfigData = gameConfigData;
     }
 
     /**
-     * Load the scratch game board
+     * Load the matrix with standard symbols
+     * @return matrix the input matrix
      */
-    public void loadStandardSymbolsInBoard(final String[][] matrix){
-
+    public String[][] loadStandardSymbolsInBoard(){
+        final String[][] matrix = new String[gameConfigData.getRows()][gameConfigData.getColumns()];
         //first populate the standard symbols in the matrix
         Optional.ofNullable(gameConfigData.getProbabilities())
                 .map(Probability::getStandardSymbols)
@@ -31,10 +36,13 @@ public class ScratchGameBoard implements GameBoard{
                     matrix[standardSymbol.getRow()][standardSymbol.getColumn()]= ScratchGameUtil.generateRandomSymbol(standardSymbol.getSymbols());
                     });
         });
+        return matrix;
     }
 
     /**
-     * Load the scratch game board
+     * Load the matrix with bonus symbols
+     * @param matrix the input matrix
+     * @return bonus symbol
      */
     public String loadBonusSymbolsInBoard(final String[][] matrix){
 
@@ -48,9 +56,9 @@ public class ScratchGameBoard implements GameBoard{
     }
 
     /**
-     *
-     * @param matrix
-     * @return
+     * Decide the winning combination
+     * @param matrix decide the winning combinations for this matrix
+     * @return winning combinations for the symbols
      */
     public Map<String,List<String>> decideWinningCombination(final String[][] matrix){
         final Map<String,WinCombination> winCombMap = this.gameConfigData.getWinCombinations();
@@ -73,11 +81,11 @@ public class ScratchGameBoard implements GameBoard{
 
     /**
      * Iterate the board matrix to find the winning combinations that is applicable
-     * @param horizontalCells horizontal
-     * @param verticalCells
-     * @param diagonalLeftToRightCells
-     * @param diagonalRightToLeftCells
-     * @return
+     * @param horizontalCells horizontal cells to be checked for repeated symbols
+     * @param verticalCells vertical cells to be checked for repeated symbols
+     * @param diagonalLeftToRightCells diagonal left to right cells to be checked for repeated symbols
+     * @param diagonalRightToLeftCells diagonal right to left cells to be checked for repeated symbols
+     * @return winning combinations for the symbols
      */
     private Map<String,List<String>> mapWinningCombination(final String[][] matrix, final String horizontalCells, final String verticalCells, final String diagonalLeftToRightCells, final String diagonalRightToLeftCells){
 
@@ -163,7 +171,7 @@ public class ScratchGameBoard implements GameBoard{
 
         sameSymbolCounter.forEach((k,v)->{
             if(gameConfigData.getWinCombinations().containsKey(ScratchGameConstants.SAME_SYMBOL + v + ScratchGameConstants.TIMES)) {
-                appliedWinningCombination.put(k, new ArrayList<String>(Arrays.asList(ScratchGameConstants.SAME_SYMBOL + v + ScratchGameConstants.TIMES)));
+                appliedWinningCombination.put(k, new ArrayList<>(Collections.singletonList(ScratchGameConstants.SAME_SYMBOL + v + ScratchGameConstants.TIMES)));
             }
         });
 
@@ -172,13 +180,16 @@ public class ScratchGameBoard implements GameBoard{
         ScratchGameUtil.addSymbolToList(diagonalLeftToRightSymbolMatchList,appliedWinningCombination, ScratchGameConstants.SAME_SYMBL_LTR_DIAGONAL);
         ScratchGameUtil.addSymbolToList(diagonalRightToLeftSymbolMatchList,appliedWinningCombination, ScratchGameConstants.SAME_SYMBL_RTL_DIAGONAL);
 
-        //@TBR
-        appliedWinningCombination.keySet().forEach(k->{
-            System.out.println(k+"..."+appliedWinningCombination.get(k));
-        });
         return appliedWinningCombination;
     }
 
+    /**
+     * Calculate the Rewards for the applied winning combination
+     * @param appliedWinningCombination selected winning combination
+     * @param bonusSymbol selected bonus
+     * @param betAmount selected bet amount
+     * @return total reward
+     */
     public double calculateReward(final Map<String, List<String>> appliedWinningCombination, final String bonusSymbol, final double betAmount){
         double totalReward=0;
 
@@ -212,30 +223,25 @@ public class ScratchGameBoard implements GameBoard{
         return totalReward;
     }
 
-    public void playGame(){
-        final String[][] matrix = new String[gameConfigData.getRows()][gameConfigData.getColumns()];
-        loadStandardSymbolsInBoard(matrix);
-        String bonusSymbol= loadBonusSymbolsInBoard(matrix);
-        Map<String, List<String>> appliedWinningCombination = decideWinningCombination(matrix);
-        double rewards = calculateReward(appliedWinningCombination, bonusSymbol, 100f);
+    /**
+     * Play Game
+     * @param betAmount betting amount
+     */
+    public void playGame(final double betAmount){
+        final String[][] matrix = loadStandardSymbolsInBoard();
+        final String bonusSymbol= loadBonusSymbolsInBoard(matrix);
+        final Map<String, List<String>> appliedWinningCombination = decideWinningCombination(matrix);
+        final double rewards = calculateReward(appliedWinningCombination, bonusSymbol, betAmount);
 
-        ScratchGameResult scratchGameResult = new ScratchGameResult(matrix,appliedWinningCombination, bonusSymbol, rewards);
+        final ScratchGameResult scratchGameResult = new ScratchGameResult(matrix,appliedWinningCombination, bonusSymbol, rewards);
 
         //@TBR
-        ObjectMapper ob =ObjectMapperBuilder.getObjectMapper();
+        final ObjectMapper ob =ObjectMapperBuilder.getObjectMapper();
         try {
-            scratchGameResult.setAppliedWinningCombinations(appliedWinningCombination);
-            System.out.println("output..."+ob.writeValueAsString(scratchGameResult));
-        }catch(Exception e){
-
+            System.out.println(ob.writeValueAsString(scratchGameResult));
+        }catch(IOException e){
+            System.out.println(ScratchGameConstants.RESULT_PARSING_ERR_MSG);
         }
-
-        /*Map<String, List<String>> appliedWinningCombination1 = new HashMap<>();
-        //appliedWinningCombination1.put("E",Arrays.asList("same_symbol_3_times","same_symbols_vertically","same_symbols_diagonally_right_to_left"));
-        //appliedWinningCombination1.put("F",Arrays.asList("same_symbol_4_times","same_symbols_vertically"));
-        appliedWinningCombination1.put("E",Arrays.asList("same_symbol_4_times","same_symbols_horizontally","same_symbols_horizontally","same_symbols_vertically"));
-
-        calculateReward(appliedWinningCombination1,"+500",100f);*/
     }
 
 }

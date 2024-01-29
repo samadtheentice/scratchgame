@@ -1,18 +1,27 @@
 package org.cyberspeed.util;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.cyberspeed.constants.ScratchGameConstants;
+import org.cyberspeed.exception.ConfigFileParsingException;
+import org.cyberspeed.model.GameConfigData;
+import org.cyberspeed.objectmapper.ObjectMapperBuilder;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+/**
+ * Utility methods
+ */
 public class ScratchGameUtil {
 
     /**
      * Generate random symbol based on the probability percentage
-     * @param symbols
-     * @return
+     * @param symbols symbols
+     * @return random symbol
      */
     public static String generateRandomSymbol(final Map<String,Integer> symbols){
         final int totalValue = symbols.values().stream().mapToInt(Integer::intValue).sum();
@@ -30,10 +39,51 @@ public class ScratchGameUtil {
         return selectedSymbol;
     }
 
+    /**
+     * Add symbol to List
+     * @param symbolMatchLst symbol list
+     * @param appliedWinningCombination winning combination
+     * @param group group
+     */
     public static void addSymbolToList(final List<String> symbolMatchLst,final Map<String,List<String>> appliedWinningCombination, final String group){
         symbolMatchLst.forEach(k->{
             appliedWinningCombination.computeIfAbsent(k, v -> new ArrayList<>()).add(group);
         });
+    }
+
+    /**
+     * Get file name from program arguments
+     * @param args program argument
+     * @return file name
+     */
+    public static String getFileName(String[] args){
+        return ScratchGameConstants.PRG_ARG_CONFIG.equalsIgnoreCase(args[0]) ? args[1] : ScratchGameConstants.PRG_ARG_CONFIG.equalsIgnoreCase(args[2]) ? args[3] : null;
+    }
+
+    /**
+     * Get betting amount from program arguments
+     * @param args program argument
+     * @return bet amount
+     */
+    public static String getBettingAmount(String[] args){
+        return ScratchGameConstants.PRG_ARG_BET_AMNT.equalsIgnoreCase(args[0]) ? args[1] : ScratchGameConstants.PRG_ARG_BET_AMNT.equalsIgnoreCase(args[2]) ? args[3] : "0.0";
+    }
+
+    /**
+     * Get the Game Config object from the json format
+     * @param configFile config file
+     * @return Game config object
+     * @throws ConfigFileParsingException
+     */
+    public static GameConfigData getScratchGameConfigData(final String configFile) throws ConfigFileParsingException {
+
+        try(final FileInputStream inputStream = new FileInputStream(configFile)) {
+            final ObjectMapper mapper = ObjectMapperBuilder.getObjectMapper();
+            final GameConfigData gameConfigData = mapper.readValue(inputStream, GameConfigData.class);
+            return gameConfigData;
+        }catch (final IOException exception) {
+            throw new ConfigFileParsingException(ScratchGameConstants.CONFIG_FILE_PARSING_ERROR, exception);
+        }
     }
 
 }
