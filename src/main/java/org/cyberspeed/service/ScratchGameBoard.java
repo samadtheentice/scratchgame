@@ -87,6 +87,13 @@ public class ScratchGameBoard implements GameBoard{
 
         verticalCells = new StringBuilder(verticalCells).reverse().toString();
 
+        //@TBR
+        /*System.out.println("horizontalCells..."+horizontalCells);
+        System.out.println("diagonalLeftToRightCells..."+diagonalLeftToRightCells);
+        System.out.println("diagonalRightToLeftCells..."+diagonalRightToLeftCells);
+        System.out.println("verticalCells..."+verticalCells);
+        System.out.println("reversed verticalCells..."+verticalCells);*/
+
         mapWinningCombination(horizontalCells, verticalCells, diagonalLeftToRightCells, diagonalRightToLeftCells);
 
     }
