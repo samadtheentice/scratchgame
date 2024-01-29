@@ -10,9 +10,9 @@ import java.util.Map;
 public class GameConfigData {
     private short columns;
     private short rows;
-    private List<Symbol> symbols;
+    private Map<String,Symbol> symbols;
     private Probability probabilities;
     @JsonProperty("win_combinations")
-    private List<WinCombination> winCombinations;
+    private Map<String,WinCombination> winCombinations;
 
 }

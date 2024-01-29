@@ -5,7 +5,6 @@ import lombok.Data;
 
 @Data
 public class Symbol {
-    private String symbolName;
     @JsonProperty("reward_multiplier")
     private float rewardMultiplier;
     private String type;

@@ -31,17 +31,14 @@ public class ScratchGame {
         }
     }
 
-    public static void playGame(final GameConfigData gameConfigData){
+    /*public static void playGame(final GameConfigData gameConfigData){
         final String[][] matrix = generateMatrixWithStandardAndBonusSymbol(gameConfigData);
 
         decideWinningCombination(gameConfigData, matrix);
-    }
+    }*/
 
 
-    public static void decideWinningCombination(final GameConfigData gameConfigData, final String[][] matrix){
-
-
-
+    /*public static void decideWinningCombination(final GameConfigData gameConfigData, final String[][] matrix){
 
         //gameConfigData.getWinCombinations().stream().filter(sameSymbolwincom -> "same_symbols".equals(sameSymbolwincom.getGroup())).findFirst();
         String horizontalCells = gameConfigData.getWinCombinations().stream().filter(sameSymbolwincom -> "horizontally_linear_symbols".equals(sameSymbolwincom.getGroup())).findFirst().get().getCoveredAreas().stream().flatMap(l->l.stream()).collect(Collectors.joining("::"));
@@ -59,9 +56,9 @@ public class ScratchGame {
 
         countSameSymbols(matrix, horizontalCells, diagonalLeftToRightCells, diagonalRightToLeftCells, verticalCells);
 
-    }
+    }*/
 
-    public static  Map<String,Integer> countSameSymbols(final String[][] matrix, final String horizontalCells, final String diagonalLeftToRightCells,final String diagonalRightToLeftCells, final String verticalCells){
+    /*public static  Map<String,Integer> countSameSymbols(final String[][] matrix, final String horizontalCells, final String diagonalLeftToRightCells,final String diagonalRightToLeftCells, final String verticalCells){
         final Map<String,List<String>> appliedWinningCombination = new HashMap<>();
         //iterate the matrix to find the count of repeated symbol
         Map<String,Integer> sameSymbolCounter = new HashMap<>();
@@ -211,11 +208,11 @@ public class ScratchGame {
             System.out.println(k+"..."+appliedWinningCombination.get(k));
         });
         return sameSymbolCounter;
-    }
+    }*/
 
 
     //generate matrix with standard and bonus symbol
-    public static String[][] generateMatrixWithStandardAndBonusSymbol(final GameConfigData gameConfigData){
+    /*public static String[][] generateMatrixWithStandardAndBonusSymbol(final GameConfigData gameConfigData){
 
         final String[][] matrix = new String[gameConfigData.getRows()][gameConfigData.getColumns()];
 
@@ -237,11 +234,11 @@ public class ScratchGame {
             });
         });
         return matrix;
-    }
+    }*/
 
 
     //Generate random symbol based on the probability percentage
-    public static String getRandomSymbol(final Map<String,Integer> symbols){
+    /* static String getRandomSymbol(final Map<String,Integer> symbols){
         final int totalValue = symbols.values().stream().mapToInt(Integer::intValue).sum();
         final int randomNumber = new Random().nextInt(100);
         float cumulativeProbability=0.0f;
@@ -255,5 +252,5 @@ public class ScratchGame {
             }
         }
         return selectedSymbol;
-    }
+    }*/
 }

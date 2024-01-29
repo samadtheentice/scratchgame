@@ -16,7 +16,6 @@ public class ScratchGameConfigParser {
         try(final FileInputStream inputStream = new FileInputStream(configFile)) {
             final ObjectMapper mapper = ObjectMapperBuilder.getObjectMapper();
             final GameConfigData gameConfigData = mapper.readValue(inputStream, GameConfigData.class);
-            System.out.println("wc..." + gameConfigData.getWinCombinations().stream().filter(wc -> "vertically_linear_symbols".equalsIgnoreCase(wc.getGroup())).findFirst().get().getCoveredAreas());
             return gameConfigData;
         }catch (final IOException exception) {
             throw new ConfigFileParsingException(ScratchGameConstants.CONFIG_FILE_PARSING_ERROR, exception);

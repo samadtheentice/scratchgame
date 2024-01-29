@@ -7,6 +7,7 @@ import org.cyberspeed.util.ScratchGameUtil;
 
 import java.util.*;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -39,36 +40,54 @@ public class ScratchGameBoard implements GameBoard{
         this.matrix[new Random().nextInt((gameConfigData.getRows()))][new Random().nextInt((gameConfigData.getColumns()))]=bonusSymbol;
 
         //@TBR
-        /*IntStream.range(0, gameConfigData.getRows()).forEach(i -> {
+        IntStream.range(0, gameConfigData.getRows()).forEach(i -> {
             IntStream.range(0, gameConfigData.getColumns()).forEach( j -> {
                 System.out.println("standard symbol....("+i + ","+j+") selected symbol.." +matrix[i][j]);
             });
+        });
+
+        /*gameConfigData.getWinCombinations().forEach((k, v) -> {
+            System.out.println((k + ":" + v.getRewardMultiplier()));
+            System.out.println((k + ":" + v.getGroup()));
+            System.out.println((k + ":" + v.getCount()));
+            System.out.println((k + ":" + v.getWhen()));
+            System.out.println((k + ":" + v.getCoveredAreas()));
+        });
+
+        gameConfigData.getSymbols().forEach((k, v) -> {
+            System.out.println((k + ":" + v.getType()));
+            System.out.println((k + ":" + v.getImpact()));
+            System.out.println((k + ":" + v.getExtra()));
+            System.out.println((k + ":" + v.getRewardMultiplier()));
+        });
+
+        this.gameConfigData.getWinCombinations().forEach((k, v) -> {
+            System.out.println((k + "--" + v));
+            System.out.println((k + "--" + v));
+            System.out.println((k + "--" + v));
+            System.out.println((k + "--" + v));
         });*/
     }
 
+    /**
+     *
+     */
     public void decideWinningCombination(){
-        final List<WinCombination> winCombLst = this.gameConfigData.getWinCombinations();
+        final Map<String,WinCombination> winCombMap = this.gameConfigData.getWinCombinations();
 
-        final BiFunction<List<WinCombination>, String, String> winData = (winCombData, winCombGroup) -> {
-            return winCombData.stream()
-            .filter(winComb -> winCombGroup.equals(winComb.getGroup()))
-            .findFirst().get().getCoveredAreas().stream()
+        final Function<WinCombination, String> winData = (winCombData) -> {
+            return winCombData.getCoveredAreas().stream()
             .flatMap(Collection::stream).collect(Collectors.joining("::"));
         };
 
-        String horizontalCells = winData.apply(winCombLst,ScratchGameConstants.WIN_COMB_HORIZONTAL_LINEAR_SYMBL);
-        String verticalCells = winData.apply(winCombLst,ScratchGameConstants.WIN_COMB_VERTICAL_LINEAR_SYMBL);
-        String diagonalLeftToRightCells = winData.apply(winCombLst,ScratchGameConstants.WIN_COMB_LTR_DIAGONAL_LINEAR_SYMBL);
-        String diagonalRightToLeftCells = winData.apply(winCombLst,ScratchGameConstants.WIN_COMB_RTL_DIAGONAL_LINEAR_SYMBL);
+        final String horizontalCells = winData.apply(winCombMap.get(ScratchGameConstants.SAME_SYMBL_HORIZONTAL));
+        String verticalCells = winData.apply(winCombMap.get(ScratchGameConstants.SAME_SYMBL_VERTICAL));
+        final String diagonalLeftToRightCells = winData.apply(winCombMap.get(ScratchGameConstants.SAME_SYMBL_LTR_DIAGONAL));
+        final String diagonalRightToLeftCells = winData.apply(winCombMap.get(ScratchGameConstants.SAME_SYMBL_RTL_DIAGONAL));
 
-        System.out.println("horizontalCells..."+horizontalCells);
-        System.out.println("diagonalLeftToRightCells..."+diagonalLeftToRightCells);
-        System.out.println("diagonalRightToLeftCells..."+diagonalRightToLeftCells);
         verticalCells = new StringBuilder(verticalCells).reverse().toString();
-        System.out.println("verticalCells..."+verticalCells);
-        System.out.println("reversed verticalCells..."+verticalCells);
 
-        countSameSymbols(horizontalCells, verticalCells, diagonalLeftToRightCells, diagonalRightToLeftCells);
+        mapWinningCombination(horizontalCells, verticalCells, diagonalLeftToRightCells, diagonalRightToLeftCells);
 
     }
 
@@ -80,7 +99,7 @@ public class ScratchGameBoard implements GameBoard{
      * @param diagonalRightToLeftCells
      * @return
      */
-    public Map<String,Integer> countSameSymbols(final String horizontalCells, final String verticalCells, final String diagonalLeftToRightCells, final String diagonalRightToLeftCells){
+    public Map<String,List<String>> mapWinningCombination(final String horizontalCells, final String verticalCells, final String diagonalLeftToRightCells, final String diagonalRightToLeftCells){
 
         final Map<String,List<String>> appliedWinningCombination = new HashMap<>();
 
@@ -90,54 +109,59 @@ public class ScratchGameBoard implements GameBoard{
         final List<String> diagonalLeftToRightSymbolMatchList = new ArrayList<>();
         final List<String> diagonalRightToLeftSymbolMatchList = new ArrayList<>();
 
-        boolean diagonalLeftToRightSymbolsMatch=false;
-        String diagonalLeftToRightSymbol=null;
-        boolean diagonalRightToLeftSymbolsMatch=false;
-        String diagonalRightToLeftSymbol=null;
+        boolean diagonalLeftToRightSymbolsMatch = false;
+        String diagonalLeftToRightSymbol = null;
+        boolean diagonalRightToLeftSymbolsMatch = false;
+        String diagonalRightToLeftSymbol = null;
 
-        for(int i=0;i < matrix.length;i++){
-            boolean horizontalSymbolsMatch=false;
-            String horizontalSymbol=null;
-            boolean verticalSymbolsMatch=false;
-            String verticalSymbol=null;
+        for(int i=0; i < matrix.length; i++){
+            boolean horizontalSymbolsMatch = false;
+            String horizontalSymbol = null;
+            boolean verticalSymbolsMatch = false;
+            String verticalSymbol = null;
 
-            for(int j=0;j < matrix[i].length;j++){
+            for(int j=0; j < matrix[i].length; j++){
+                //same symbol count
                 sameSymbolCounter.put(matrix[i][j], sameSymbolCounter.getOrDefault(matrix[i][j], 0)+1);
 
+                //match horizontal symbols
                 if(horizontalCells.contains(i + ":" + j) ){
                     if(null == horizontalSymbol){
                         horizontalSymbol=matrix[i][j];
-                        horizontalSymbolsMatch=true;
+                        horizontalSymbolsMatch = true;
                     }else if(!matrix[i][j].equalsIgnoreCase(horizontalSymbol)){
-                        horizontalSymbolsMatch=false;
+                        horizontalSymbolsMatch = false;
                     }
                 }
 
+                //match vertical symbols
                 if(verticalCells.contains(j + ":" + i) ){
 
                     if(null == verticalSymbol){
                         verticalSymbol=matrix[j][i];
-                        verticalSymbolsMatch=true;
+                        verticalSymbolsMatch = true;
                     }else if(!matrix[j][i].equalsIgnoreCase(verticalSymbol)){
-                        verticalSymbolsMatch=false;
+                        verticalSymbolsMatch = false;
                     }
                 }
 
+                //match diagonal LTR symbols
                 if(diagonalLeftToRightCells.contains(i + ":" + j) ){
                     if(null == diagonalLeftToRightSymbol){
                         diagonalLeftToRightSymbol=matrix[i][j];
-                        diagonalLeftToRightSymbolsMatch=true;
+                        diagonalLeftToRightSymbolsMatch = true;
                     }else if(!matrix[i][j].equalsIgnoreCase(diagonalLeftToRightSymbol)){
-                        diagonalLeftToRightSymbolsMatch=false;
+                        diagonalLeftToRightSymbolsMatch = false;
                     }
                 }
 
+                //match diagonal RTL symbols
                 if(diagonalRightToLeftCells.contains(i + ":" + j) ){
                     if(null == diagonalRightToLeftSymbol){
                         diagonalRightToLeftSymbol=matrix[i][j];
-                        diagonalRightToLeftSymbolsMatch=true;
+                        diagonalRightToLeftSymbolsMatch = true;
                     }else if(!matrix[i][j].equalsIgnoreCase(diagonalRightToLeftSymbol)){
-                        diagonalRightToLeftSymbolsMatch=false;
+                        diagonalRightToLeftSymbolsMatch = false;
                     }
                 }
             }
@@ -158,7 +182,9 @@ public class ScratchGameBoard implements GameBoard{
         }
 
         sameSymbolCounter.forEach((k,v)->{
-            appliedWinningCombination.put(k,new ArrayList<String>(Arrays.asList("same_symbol_"+v+"_times")));
+            if(gameConfigData.getWinCombinations().containsKey("same_symbol_"+v+"_times")) {
+                appliedWinningCombination.put(k, new ArrayList<String>(Arrays.asList("same_symbol_" + v + "_times")));
+            }
         });
 
         ScratchGameUtil.addSymbolToList(horizontalSymbolMatchList,appliedWinningCombination, ScratchGameConstants.SAME_SYMBL_HORIZONTAL);
@@ -170,12 +196,8 @@ public class ScratchGameBoard implements GameBoard{
             System.out.println(k+"..."+appliedWinningCombination.get(k));
         });
 
-        return sameSymbolCounter;
+        return appliedWinningCombination;
     }
-
-
-
-
 
     public void playGame(){
         loadGameBoard();

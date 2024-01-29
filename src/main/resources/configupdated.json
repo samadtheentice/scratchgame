@@ -1,67 +1,56 @@
 {
   "columns": 3,
   "rows": 3,
-  "symbols": [
-    {
-      "symbolName": "A",
+  "symbols": {
+    "A": {
       "reward_multiplier": 50,
       "type": "standard"
     },
-    {
-      "symbolName": "B",
+    "B": {
       "reward_multiplier": 25,
       "type": "standard"
     },
-    {
-      "symbolName": "C",
+    "C": {
       "reward_multiplier": 10,
       "type": "standard"
     },
-    {
-      "symbolName": "D",
+    "D": {
       "reward_multiplier": 5,
       "type": "standard"
     },
-    {
-      "symbolName": "E",
+    "E": {
       "reward_multiplier": 3,
       "type": "standard"
     },
-    {
-      "symbolName": "F",
+    "F": {
       "reward_multiplier": 1.5,
       "type": "standard"
     },
-    {
-      "symbolName": "10x",
+    "10x": {
       "reward_multiplier": 10,
       "type": "bonus",
       "impact": "multiply_reward"
     },
-    {
-      "symbolName": "5x",
+    "5x": {
       "reward_multiplier": 5,
       "type": "bonus",
       "impact": "multiply_reward"
     },
-    {
-      "symbolName": "+1000",
+    "+1000": {
       "extra": 1000,
       "type": "bonus",
       "impact": "extra_bonus"
     },
-    {
-      "symbolName": "+500",
+    "+500": {
       "extra": 500,
       "type": "bonus",
       "impact": "extra_bonus"
     },
-    {
-      "symbolName": "MISS",
+    "MISS": {
       "type": "bonus",
       "impact": "miss"
     }
-  ],
+  },
   "probabilities": {
     "standard_symbols": [
       {
@@ -183,50 +172,50 @@
       }
     }
   },
-  "win_combinations": [
-    {
+  "win_combinations": {
+    "same_symbol_3_times": {
       "reward_multiplier": 1,
       "when": "same_symbols",
       "count": 3,
       "group": "same_symbols"
     },
-    {
+    "same_symbol_4_times": {
       "reward_multiplier": 1.5,
       "when": "same_symbols",
       "count": 4,
       "group": "same_symbols"
     },
-    {
+    "same_symbol_5_times": {
       "reward_multiplier": 2,
       "when": "same_symbols",
       "count": 5,
       "group": "same_symbols"
     },
-    {
+    "same_symbol_6_times": {
       "reward_multiplier": 3,
       "when": "same_symbols",
       "count": 6,
       "group": "same_symbols"
     },
-    {
+    "same_symbol_7_times": {
       "reward_multiplier": 5,
       "when": "same_symbols",
       "count": 7,
       "group": "same_symbols"
     },
-    {
+    "same_symbol_8_times": {
       "reward_multiplier": 10,
       "when": "same_symbols",
       "count": 8,
       "group": "same_symbols"
     },
-    {
+    "same_symbol_9_times": {
       "reward_multiplier": 20,
       "when": "same_symbols",
       "count": 9,
       "group": "same_symbols"
     },
-    {
+    "same_symbols_horizontally": {
       "reward_multiplier": 2,
       "when": "linear_symbols",
       "group": "horizontally_linear_symbols",
@@ -245,7 +234,7 @@
         ]
       ]
     },
-    {
+    "same_symbols_vertically": {
       "reward_multiplier": 2,
       "when": "linear_symbols",
       "group": "vertically_linear_symbols",
@@ -264,7 +253,7 @@
         ]
       ]
     },
-    {
+    "same_symbols_diagonally_left_to_right": {
       "reward_multiplier": 5,
       "when": "linear_symbols",
       "group": "ltr_diagonally_linear_symbols",
@@ -275,7 +264,7 @@
         ]
       ]
     },
-    {
+    "same_symbols_diagonally_right_to_left": {
       "reward_multiplier": 5,
       "when": "linear_symbols",
       "group": "rtl_diagonally_linear_symbols",
@@ -286,5 +275,5 @@
         ]
       ]
     }
-  ]
+  }
 }
