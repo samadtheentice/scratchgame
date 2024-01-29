@@ -7,9 +7,9 @@ import java.util.Map;
  * Game board interface
  */
 public interface GameBoard {
-    public String[][] loadStandardSymbolsInBoard();
-    public String loadBonusSymbolsInBoard(final String[][] matrix);
-    public Map<String,List<String>> decideWinningCombination(final String[][] matrix);
-    public void playGame(final double betAmount);
-    public double calculateReward(final Map<String, List<String>> appliedWinningCombination, final String bonusSymbol, final double betAmount);
+    String[][] loadStandardSymbolsInBoard();
+    String loadBonusSymbolsInBoard(final String[][] matrix);
+    Map<String,List<String>> decideWinningCombination(final String[][] matrix);
+    void playGame(final double betAmount);
+    double calculateReward(final Map<String, List<String>> appliedWinningCombination, final String bonusSymbol, final double betAmount);
 }
