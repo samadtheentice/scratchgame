@@ -1,78 +1,59 @@
 package org.cyberspeed.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.cyberspeed.constants.ScratchGameConstants;
 import org.cyberspeed.model.GameConfigData;
+import org.cyberspeed.model.ScratchGameResult;
 import org.cyberspeed.model.WinCombination;
+import org.cyberspeed.objectmapper.ObjectMapperBuilder;
 import org.cyberspeed.util.ScratchGameUtil;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import org.cyberspeed.model.Symbol;
 
 public class ScratchGameBoard implements GameBoard{
 
     private GameConfigData gameConfigData;
 
-    private String[][] matrix;
-
     public ScratchGameBoard(final GameConfigData gameConfigData){
         this.gameConfigData = gameConfigData;
-        this.matrix = new String[gameConfigData.getRows()][gameConfigData.getColumns()];
     }
-
 
     /**
      * Load the scratch game board
      */
-    public void loadGameBoard(){
+    public void loadStandardSymbolsInBoard(final String[][] matrix){
 
         //first populate the standard symbols in the matrix
         gameConfigData.getProbabilities().getStandardSymbols().parallelStream().forEach(standardSymbol->{
-            this.matrix[standardSymbol.getRow()][standardSymbol.getColumn()]= ScratchGameUtil.generateRandomSymbol(standardSymbol.getSymbols());
+            matrix[standardSymbol.getRow()][standardSymbol.getColumn()]= ScratchGameUtil.generateRandomSymbol(standardSymbol.getSymbols());
         });
+    }
+
+    /**
+     * Load the scratch game board
+     */
+    public String loadBonusSymbolsInBoard(final String[][] matrix){
 
         //populate the bonus symbol
         final String bonusSymbol = ScratchGameUtil.generateRandomSymbol(gameConfigData.getProbabilities().getBonusSymbols().getSymbols());
 
         //replace bonus symbol to any random cell in the matrix
-        this.matrix[new Random().nextInt((gameConfigData.getRows()))][new Random().nextInt((gameConfigData.getColumns()))]=bonusSymbol;
+        matrix[new Random().nextInt((gameConfigData.getRows()))][new Random().nextInt((gameConfigData.getColumns()))]=bonusSymbol;
 
-        //@TBR
-        IntStream.range(0, gameConfigData.getRows()).forEach(i -> {
-            IntStream.range(0, gameConfigData.getColumns()).forEach( j -> {
-                System.out.println("standard symbol....("+i + ","+j+") selected symbol.." +matrix[i][j]);
-            });
-        });
-
-        /*gameConfigData.getWinCombinations().forEach((k, v) -> {
-            System.out.println((k + ":" + v.getRewardMultiplier()));
-            System.out.println((k + ":" + v.getGroup()));
-            System.out.println((k + ":" + v.getCount()));
-            System.out.println((k + ":" + v.getWhen()));
-            System.out.println((k + ":" + v.getCoveredAreas()));
-        });
-
-        gameConfigData.getSymbols().forEach((k, v) -> {
-            System.out.println((k + ":" + v.getType()));
-            System.out.println((k + ":" + v.getImpact()));
-            System.out.println((k + ":" + v.getExtra()));
-            System.out.println((k + ":" + v.getRewardMultiplier()));
-        });
-
-        this.gameConfigData.getWinCombinations().forEach((k, v) -> {
-            System.out.println((k + "--" + v));
-            System.out.println((k + "--" + v));
-            System.out.println((k + "--" + v));
-            System.out.println((k + "--" + v));
-        });*/
+        return bonusSymbol;
     }
 
     /**
      *
+     * @param matrix
+     * @return
      */
-    public void decideWinningCombination(){
+    public Map<String,List<String>> decideWinningCombination(final String[][] matrix){
         final Map<String,WinCombination> winCombMap = this.gameConfigData.getWinCombinations();
 
         final Function<WinCombination, String> winData = (winCombData) -> {
@@ -87,14 +68,7 @@ public class ScratchGameBoard implements GameBoard{
 
         verticalCells = new StringBuilder(verticalCells).reverse().toString();
 
-        //@TBR
-        /*System.out.println("horizontalCells..."+horizontalCells);
-        System.out.println("diagonalLeftToRightCells..."+diagonalLeftToRightCells);
-        System.out.println("diagonalRightToLeftCells..."+diagonalRightToLeftCells);
-        System.out.println("verticalCells..."+verticalCells);
-        System.out.println("reversed verticalCells..."+verticalCells);*/
-
-        mapWinningCombination(horizontalCells, verticalCells, diagonalLeftToRightCells, diagonalRightToLeftCells);
+        return mapWinningCombination(matrix, horizontalCells, verticalCells, diagonalLeftToRightCells, diagonalRightToLeftCells);
 
     }
 
@@ -106,7 +80,7 @@ public class ScratchGameBoard implements GameBoard{
      * @param diagonalRightToLeftCells
      * @return
      */
-    public Map<String,List<String>> mapWinningCombination(final String horizontalCells, final String verticalCells, final String diagonalLeftToRightCells, final String diagonalRightToLeftCells){
+    private Map<String,List<String>> mapWinningCombination(final String[][] matrix, final String horizontalCells, final String verticalCells, final String diagonalLeftToRightCells, final String diagonalRightToLeftCells){
 
         final Map<String,List<String>> appliedWinningCombination = new HashMap<>();
 
@@ -189,8 +163,8 @@ public class ScratchGameBoard implements GameBoard{
         }
 
         sameSymbolCounter.forEach((k,v)->{
-            if(gameConfigData.getWinCombinations().containsKey("same_symbol_"+v+"_times")) {
-                appliedWinningCombination.put(k, new ArrayList<String>(Arrays.asList("same_symbol_" + v + "_times")));
+            if(gameConfigData.getWinCombinations().containsKey(ScratchGameConstants.SAME_SYMBOL + v + ScratchGameConstants.TIMES)) {
+                appliedWinningCombination.put(k, new ArrayList<String>(Arrays.asList(ScratchGameConstants.SAME_SYMBOL + v + ScratchGameConstants.TIMES)));
             }
         });
 
@@ -199,16 +173,69 @@ public class ScratchGameBoard implements GameBoard{
         ScratchGameUtil.addSymbolToList(diagonalLeftToRightSymbolMatchList,appliedWinningCombination, ScratchGameConstants.SAME_SYMBL_LTR_DIAGONAL);
         ScratchGameUtil.addSymbolToList(diagonalRightToLeftSymbolMatchList,appliedWinningCombination, ScratchGameConstants.SAME_SYMBL_RTL_DIAGONAL);
 
+        //@TBR
         appliedWinningCombination.keySet().forEach(k->{
             System.out.println(k+"..."+appliedWinningCombination.get(k));
         });
-
         return appliedWinningCombination;
     }
 
+    public double calculateReward(final Map<String, List<String>> appliedWinningCombination, final String bonusSymbol, final double betAmount){
+        double totalReward=0;
+
+        for(final String key : appliedWinningCombination.keySet()){
+            final List<String> symbolWinComb = appliedWinningCombination.get(key);
+            double reward = 0;
+            //apply reward for symbol
+            double symbolReward = this.gameConfigData.getSymbols().get(key).getRewardMultiplier();
+            reward = betAmount * symbolReward;
+            for(final String winComb : symbolWinComb){
+                //apply reward for winning combination
+                reward = reward * this.gameConfigData.getWinCombinations().get(winComb).getRewardMultiplier();
+            }
+            totalReward = totalReward + reward;
+        }
+
+        //apply bonus if rewards more than 0
+        if(totalReward > 0){
+            final Symbol symbol = this.gameConfigData.getSymbols().get(bonusSymbol);
+            System.out.println("bonus chk1.."+bonusSymbol);
+            System.out.println("bonus chk2.."+symbol.getImpact());
+            if(ScratchGameConstants.MULTIPLY_REWARD.equalsIgnoreCase(symbol.getImpact())){
+                totalReward = totalReward * symbol.getRewardMultiplier();
+                System.out.println("bonus chk3.."+totalReward);
+            }else if(ScratchGameConstants.EXTRA_BONUS.equalsIgnoreCase(symbol.getImpact())){
+                totalReward = totalReward + symbol.getExtra();
+                System.out.println("bonus chk4.."+totalReward);
+            }
+        }
+        return totalReward;
+    }
+
     public void playGame(){
-        loadGameBoard();
-        decideWinningCombination();
+        final String[][] matrix = new String[gameConfigData.getRows()][gameConfigData.getColumns()];
+        loadStandardSymbolsInBoard(matrix);
+        String bonusSymbol= loadBonusSymbolsInBoard(matrix);
+        Map<String, List<String>> appliedWinningCombination = decideWinningCombination(matrix);
+        double rewards = calculateReward(appliedWinningCombination, bonusSymbol, 100f);
+
+        ScratchGameResult scratchGameResult = new ScratchGameResult(matrix,appliedWinningCombination, bonusSymbol, rewards);
+
+        //@TBR
+        ObjectMapper ob =ObjectMapperBuilder.getObjectMapper();
+        try {
+            scratchGameResult.setAppliedWinningCombinations(appliedWinningCombination);
+            System.out.println("output..."+ob.writeValueAsString(scratchGameResult));
+        }catch(Exception e){
+
+        }
+
+        /*Map<String, List<String>> appliedWinningCombination1 = new HashMap<>();
+        //appliedWinningCombination1.put("E",Arrays.asList("same_symbol_3_times","same_symbols_vertically","same_symbols_diagonally_right_to_left"));
+        //appliedWinningCombination1.put("F",Arrays.asList("same_symbol_4_times","same_symbols_vertically"));
+        appliedWinningCombination1.put("E",Arrays.asList("same_symbol_4_times","same_symbols_horizontally","same_symbols_horizontally","same_symbols_vertically"));
+
+        calculateReward(appliedWinningCombination1,"+500",100f);*/
     }
 
 }

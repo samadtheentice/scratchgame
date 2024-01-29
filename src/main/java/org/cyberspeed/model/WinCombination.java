@@ -7,7 +7,7 @@ import java.util.List;
 @Data
 public class WinCombination{
     @JsonProperty("reward_multiplier")
-    private short rewardMultiplier;
+    private double rewardMultiplier;
     private String when;
     private short count;
     private String group;

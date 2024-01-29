@@ -20,7 +20,7 @@ public class ScratchGame {
     public static void main(String[] args) {
 
         try {
-            GameConfigData gameConfigData = ScratchGameConfigParser.getScratchGameConfigData("C:\\scratchgame\\src\\main\\resources\\config.json");
+            GameConfigData gameConfigData = ScratchGameConfigParser.getScratchGameConfigData("C:\\scratchgame\\src\\main\\resources\\configupdated.json");
 
             GameBoard gb = new ScratchGameBoard(gameConfigData);
             gb.playGame();

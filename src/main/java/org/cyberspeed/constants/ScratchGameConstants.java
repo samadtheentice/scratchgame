@@ -9,4 +9,10 @@ public class ScratchGameConstants {
     public static final String SAME_SYMBL_VERTICAL = "same_symbols_vertically";
     public static final String SAME_SYMBL_LTR_DIAGONAL = "same_symbols_diagonally_left_to_right";
     public static final String SAME_SYMBL_RTL_DIAGONAL = "same_symbols_diagonally_right_to_left";
+    public static final String MULTIPLY_REWARD = "multiply_reward";
+    public static final String EXTRA_BONUS = "extra_bonus";
+
+    public static final String SAME_SYMBOL="same_symbol_";
+    public static final String TIMES="_times";
+
 }
