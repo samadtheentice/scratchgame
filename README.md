@@ -1,18 +1,18 @@
 # scratchgame
 
 1. Software Used
--------------
+
 Java 1.8
 IntelliJ IDEA community edition
 Gradle
 
 2. Libraries Used
---------------
+
 Junit
 jackson-databind
 
 3. Instructions To Build the project
----------------------------------
+
 
 	a. Pull the scratchgame project from repo - https://github.com/samadtheentice/scratchgame
 	b. In IntelliJ or Eclipse, locate the project from filesystem and open the project
@@ -25,15 +25,15 @@ jackson-databind
 
 
 4. Program Running time
--------------------
+
 490ms avg
 
--------------------------------------------
+5. Unit test cases - 13
 
-5. Test Examples
---------------
+6. Test Examples
 
-Input 
+
+a. Input 
 
 C:\scratchgame\build\libs>java -jar scratchgame-1.0-SNAPSHOT.jar --config C:\scratchgame\src\main\resources\config.json --betting-amount 110
 
@@ -71,8 +71,7 @@ Output
     "applied_bonus_symbol": "5x"
 }
 
---------------------------------------------------------------
-Input
+b. Input
 
 C:\scratchgame\build\libs>java -jar scratchgame-1.0-SNAPSHOT.jar --config C:\scratchgame\src\main\resources\config.json --betting-amount 150
 
