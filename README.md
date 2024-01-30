@@ -14,14 +14,14 @@
 3. Instructions To Build the project
 
 
-	a. Pull the scratchgame project from repo - https://github.com/samadtheentice/scratchgame
-	b. In IntelliJ or Eclipse, locate the project from filesystem and open the project
-	c. From IntelliJ terminal windo
-		Use ./gradlew clean to remove the generated jar
-		Use ./gradlew build to build the project
-	d. A sample config file is located in the project resource folder e.g, C:\scratchgame\src\main\resources\config.json
-	e. To run the project, open command prompt, and change the directory to the location where the jar file is created e.g, C:\scratchgame\build\libs
-	f. Use command -> java -jar scratchgame-1.0-SNAPSHOT.jar --config C:\scratchgame\src\main\resources\config.json --betting-amount 100
+	a. Pull the scratchgame project from repo - https://github.com/samadtheentice/scratchgame \
+	b. In IntelliJ or Eclipse, locate the project from filesystem and open the project \
+	c. From IntelliJ terminal windo \
+		Use ./gradlew clean to remove the generated jar \
+		Use ./gradlew build to build the project \
+	d. A sample config file is located in the project resource folder e.g, C:\scratchgame\src\main\resources\config.json \
+	e. To run the project, open command prompt, and change the directory to the location where the jar file is created e.g, C:\scratchgame\build\libs \
+	f. Use command -> java -jar scratchgame-1.0-SNAPSHOT.jar --config C:\scratchgame\src\main\resources\config.json --betting-amount 100 \
 
 
 4. Program Running time - 490ms avg
