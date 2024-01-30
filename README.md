@@ -28,7 +28,9 @@
 
 5. Unit test cases - 13
 
-6. Test Examples
+6. Implemented all winning combinations including those specified as optional
+
+7. Test Examples
 
 
 	a. Input
