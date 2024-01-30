@@ -1,10 +1,17 @@
 package org.cyberspeed.model;
 
-import lombok.Data;
-
+//import lombok.Data;
 import java.util.Map;
 
-@Data
+//@Data
 public class ProbabilitySymbol {
     Map<String,String> symbols;
+
+    public Map<String, String> getSymbols() {
+        return symbols;
+    }
+
+    public void setSymbols(Map<String, String> symbols) {
+        this.symbols = symbols;
+    }
 }
