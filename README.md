@@ -2,14 +2,14 @@
 
 1. Software Used
 
-Java 1.8
-IntelliJ IDEA community edition
-Gradle
+	a. Java 1.8
+	b. IntelliJ IDEA community edition
+	c. Gradle 9.0
 
 2. Libraries Used
 
-Junit
-jackson-databind
+	a. Junit
+	b. jackson-databind
 
 3. Instructions To Build the project
 
@@ -24,89 +24,87 @@ jackson-databind
 	f. Use command -> java -jar scratchgame-1.0-SNAPSHOT.jar --config C:\scratchgame\src\main\resources\config.json --betting-amount 100
 
 
-4. Program Running time
-
-490ms avg
+4. Program Running time - 490ms avg
 
 5. Unit test cases - 13
 
 6. Test Examples
 
 
-a. Input 
+	a. Input 
 
-C:\scratchgame\build\libs>java -jar scratchgame-1.0-SNAPSHOT.jar --config C:\scratchgame\src\main\resources\config.json --betting-amount 110
+	C:\scratchgame\build\libs>java -jar scratchgame-1.0-SNAPSHOT.jar --config C:\scratchgame\src\main\resources\config.json --betting-amount 110
 
 
-Output
-{
-    "matrix": [
-        [
-            "F",
-            "C",
-            "5x"
-        ],
-        [
-            "B",
-            "C",
-            "E"
-        ],
-        [
-            "C",
-            "E",
-            "E"
-        ]
-    ],
-    "reward": 14300,
-    "applied_winning_combinations": {
-        "C": [
-            "same_symbol_3_times",
-            "same_symbols_vertically"
-        ],
-        "E": [
-            "same_symbol_3_times",
-            "same_symbols_vertically"
-        ]
-    },
-    "applied_bonus_symbol": "5x"
-}
+	Output
+	{
+		"matrix": [
+			[
+				"F",
+				"C",
+				"5x"
+			],
+			[
+				"B",
+				"C",
+				"E"
+			],
+			[
+				"C",
+				"E",
+				"E"
+			]
+		],
+		"reward": 14300,
+		"applied_winning_combinations": {
+			"C": [
+				"same_symbol_3_times",
+				"same_symbols_vertically"
+			],
+			"E": [
+				"same_symbol_3_times",
+				"same_symbols_vertically"
+			]
+		},
+		"applied_bonus_symbol": "5x"
+	}
 
-b. Input
+	b. Input
 
-C:\scratchgame\build\libs>java -jar scratchgame-1.0-SNAPSHOT.jar --config C:\scratchgame\src\main\resources\config.json --betting-amount 150
+	C:\scratchgame\build\libs>java -jar scratchgame-1.0-SNAPSHOT.jar --config C:\scratchgame\src\main\resources\config.json --betting-amount 150
 
-Output
+	Output
 
-{
-    "matrix": [
-        [
-            "F",
-            "E",
-            "+500"
-        ],
-        [
-            "E",
-            "C",
-            "D"
-        ],
-        [
-            "F",
-            "D",
-            "D"
-        ]
-    ],
-    "reward": 2450,
-    "applied_winning_combinations": {
-        "D": [
-            "same_symbol_3_times",
-            "same_symbols_vertically"
-        ],
-        "F": [
-            "same_symbols_vertically"
-        ]
-    },
-    "applied_bonus_symbol": "+500"
-}
+	{
+		"matrix": [
+			[
+				"F",
+				"E",
+				"+500"
+			],
+			[
+				"E",
+				"C",
+				"D"
+			],
+			[
+				"F",
+				"D",
+				"D"
+			]
+		],
+		"reward": 2450,
+		"applied_winning_combinations": {
+			"D": [
+				"same_symbol_3_times",
+				"same_symbols_vertically"
+			],
+			"F": [
+				"same_symbols_vertically"
+			]
+		},
+		"applied_bonus_symbol": "+500"
+	}
 
 
 
