@@ -3,9 +3,7 @@ package org.cyberspeed.exception;
 import org.cyberspeed.constants.ScratchGameConstants;
 import org.cyberspeed.validator.ScratchGameValidator;
 import org.junit.jupiter.api.Test;
-
 import java.util.stream.Stream;
-
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
