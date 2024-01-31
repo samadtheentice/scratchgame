@@ -30,7 +30,9 @@
 
 6. Implemented all winning combinations including those specified as optional
 
-7. Test Examples
+7. The Solution should work for any NXN matrix, provided a valid configuration file is used, You can find example config files under resource folder, 		config.json - 3X3 matrix, config4x4.json - 4X4 matrix, config5x5.json -5X5 matrix \
+
+8. Test Examples
 
 
 	a. Input
