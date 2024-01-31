@@ -110,5 +110,114 @@
 		"applied_bonus_symbol": "+500"
 	}
 
+	c. Input 4X4 Matrix
+	
+	java -jar scratchgame-1.0-SNAPSHOT.jar --config C:\scratchgame\src\main\resources\config4x4.json --betting-amount 100
+	
+	Output
+	
+	{
+		"matrix": [
+			[
+				"F",
+				"E",
+				"F",
+				"D"
+			],
+			[
+				"F",
+				"D",
+				"E",
+				"F"
+			],
+			[
+				"F",
+				"E",
+				"D",
+				"E"
+			],
+			[
+				"10x",
+				"E",
+				"E",
+				"C"
+			]
+		],
+		"reward": 20000,
+		"applied_winning_combinations": {
+			"D": [
+				"same_symbol_3_times"
+			],
+			"E": [
+				"same_symbol_6_times"
+			],
+			"F": [
+				"same_symbol_5_times",
+				"same_symbols_vertically"
+			]
+		},
+		"applied_bonus_symbol": "10x"
+	}
+	
+	d. Input 5X5 Matrix
+	
+	java -jar scratchgame-1.0-SNAPSHOT.jar --config C:\scratchgame\src\main\resources\config5x5.json --betting-amount 100
+	
+	Output
+	
+	{
+		"matrix": [
+			[
+				"E",
+				"F",
+				"C",
+				"F",
+				"D"
+			],
+			[
+				"B",
+				"A",
+				"E",
+				"E",
+				"F"
+			],
+			[
+				"E",
+				"B",
+				"E",
+				"F",
+				"E"
+			],
+			[
+				"D",
+				"E",
+				"C",
+				"F",
+				"F"
+			],
+			[
+				"F",
+				"5x",
+				"D",
+				"D",
+				"D"
+			]
+		],
+		"reward": 16250,
+		"applied_winning_combinations": {
+			"D": [
+				"same_symbol_5_times"
+			],
+			"E": [
+				"same_symbol_7_times"
+			],
+			"F": [
+				"same_symbol_7_times"
+			]
+		},
+		"applied_bonus_symbol": "5x"
+	}
+
+
 
 
